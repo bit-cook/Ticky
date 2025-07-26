@@ -10,13 +10,22 @@
 <div id="@Id" class="@Class" style="@Style">
     @if (Items is not null && SortableItemTemplate is not null)
     {
-        <SmartVirtualize Items="Items" Context="item" ItemSize="110" OverscanCount="4">
-            <ItemContent>
-                <div @key="@item.Id">
-                    @SortableItemTemplate(item)
-                </div>
-            </ItemContent>
-        </SmartVirtualize>
+        if (Items is List<Card>)
+        {
+            <SmartVirtualize Items="Items" Context="item" ItemSize="110" OverscanCount="4">
+                <ItemContent>
+                    <div @key="@item.Id">
+                        @SortableItemTemplate(item)
+                    </div>
+                </ItemContent>
+            </SmartVirtualize>
+        } else
+        {
+            foreach (var item in Items)
+            {
+                @SortableItemTemplate(item)
+            }
+        }
     }
     else
     {
