@@ -1,21 +1,22 @@
 @using System.Collections.Generic
 @using System.Diagnostics.CodeAnalysis
 @using Microsoft.JSInterop
+@using Ticky.Web.Components.Elements.SmartVirtualize
 
 @inject IJSRuntime JS
 
-@typeparam T
+@typeparam T where T : AbstractDbEntity
 
 <div id="@Id" class="@Class" style="@Style">
-    @if (Items != null)
+    @if (Items is not null && SortableItemTemplate is not null)
     {
-        @foreach (var item in Items)
-        {
-            @if (SortableItemTemplate is not null)
-            {
-                @SortableItemTemplate(item)
-            }
-        }
+        <SmartVirtualize Items="Items" Context="item" ItemSize="110" OverscanCount="4">
+            <ItemContent>
+                <div @key="@item.Id">
+                    @SortableItemTemplate(item)
+                </div>
+            </ItemContent>
+        </SmartVirtualize>
     }
     else
     {
