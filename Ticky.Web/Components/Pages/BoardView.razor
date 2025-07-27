@@ -306,8 +306,8 @@
         StateHasChanged();
     }
 
-    private int GetColumnIdFromString(string str)
-        => Convert.ToInt32(str.Replace(COLUMN_PREFIX, string.Empty));
+    private int GetIdFromString(string prefix, string str)
+        => Convert.ToInt32(str.Replace(prefix, string.Empty));
 
     private async Task OnMovedWithinList((int oldIndex, int newIndex, string columnId) args)
     {
@@ -315,7 +315,7 @@
 
         var targetColumn = db.Columns
             .Include(x => x.Cards)
-            .FirstOrDefault(x => x.Id.Equals(GetColumnIdFromString(args.columnId)));
+            .FirstOrDefault(x => x.Id.Equals(GetIdFromString(COLUMN_PREFIX, args.columnId)));
 
         if(targetColumn is null)
             return;
@@ -343,10 +343,10 @@
         await HandleUpdate();
     }
 
-    private async Task OnMovedFromColumn((int oldIndex, int newIndex, string oldColumnId, string newColumnId, double x, double y) args)
+    private async Task OnMovedFromColumn((string movedCardId, string? targetCardId, string oldColumnId, string newColumnId, double x, double y) args)
     {
-        var oldColumnId = GetColumnIdFromString(args.oldColumnId);
-        var newColumnId = GetColumnIdFromString(args.newColumnId);
+        var oldColumnId = GetIdFromString(COLUMN_PREFIX, args.oldColumnId);
+        var newColumnId = GetIdFromString(COLUMN_PREFIX, args.newColumnId);
 
         using var db = _dbContextFactory.CreateDbContext();
 
@@ -367,26 +367,41 @@
             return;
         }
 
-        var targetCard = oldColumn.Cards.OrderBy(x => x.Index).ElementAtOrDefault(args.oldIndex);
+        var movedCardId = GetIdFromString(Constants.Html.CARD_PREFIX, args.movedCardId);
 
-        if (targetCard is null)
+        var movedCard = oldColumn.Cards.OrderBy(x => x.Index).FirstOrDefault(x => x.Id.Equals(movedCardId));
+
+        if (movedCard is null)
             return;
 
-        oldColumn.Cards.Remove(targetCard);
+        oldColumn.Cards.Remove(movedCard);
 
         IndexHelper.FixIndices(oldColumn.Cards);
 
-        foreach(var card in newColumn.Cards)
+        int targetIndex = newColumn.Cards.Any() ? newColumn.Cards.Max(x => x.Index) + 1 : 0;
+
+        if (args.targetCardId is not null)
         {
-            if(card.Index >= args.newIndex)
+            var targetCardId = GetIdFromString(Constants.Html.CARD_PREFIX, args.targetCardId);
+            var targetCard = newColumn.Cards.FirstOrDefault(x => x.Id.Equals(targetCardId));
+
+            if (targetCard is not null)
             {
-                card.Index++;
+                targetIndex = targetCard.Index;
+
+                foreach (var card in newColumn.Cards.OrderByDescending(x => x.Index))
+                {
+                    if (card.Index >= targetCard.Index)
+                    {
+                        card.Index++;
+                    }
+                }
             }
         }
 
-        newColumn.Cards.Add(targetCard);
-        targetCard.Index = args.newIndex;
-        targetCard.ColumnId = newColumnId;
+        newColumn.Cards.Add(movedCard);
+        movedCard.Index = targetIndex;
+        movedCard.ColumnId = newColumnId;
 
         IndexHelper.FixIndices(newColumn.Cards);
 

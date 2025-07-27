@@ -33,8 +33,8 @@ namespace Ticky.Web.Components.Elements.Sortable
 
         [Parameter]
         public EventCallback<(
-            int oldIndex,
-            int newIndex,
+            string movedCardId,
+            string? targetCardId,
             string oldColumnId,
             string newColumnId,
             double x,
@@ -69,8 +69,8 @@ namespace Ticky.Web.Components.Elements.Sortable
 
         [JSInvokable]
         public void OnRemoveJS(
-            int oldIndex,
-            int newIndex,
+            string movedCardId,
+            string? targetCardId,
             string fromId,
             string toId,
             double x,
@@ -78,7 +78,7 @@ namespace Ticky.Web.Components.Elements.Sortable
         )
         {
             // remove the item from the list
-            OnRemove.InvokeAsync((oldIndex, newIndex, fromId, toId, x, y));
+            OnRemove.InvokeAsync((movedCardId, targetCardId, fromId, toId, x, y));
         }
 
         [JSInvokable]

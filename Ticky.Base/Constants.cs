@@ -31,6 +31,11 @@ namespace Ticky.Base
             }
         }
 
+        public static class Html
+        {
+            public const string CARD_PREFIX = "card_";
+        }
+
         public static class Limits
         {
             public const int MINIMUM_SECOND_HOSTED_SERVICE_DELAY = 15;
