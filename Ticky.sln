@@ -8,12 +8,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ticky.Base", "Ticky.Base\Ticky.Base.csproj", "{E3267CAC-DB33-4BF9-BE1C-1B46BB6E3526}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
-	ProjectSection(SolutionItems) = preProject
-		CONTRIBUTING.md = CONTRIBUTING.md
-		.github\workflows\docker-release.yml = .github\workflows\docker-release.yml
-		Dockerfile = Dockerfile
-		README.md = README.md
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ticky.Web", "Ticky.Web\Ticky.Web.csproj", "{B1E89F57-87FE-441E-AC21-DF0A38428C1E}"
 EndProject

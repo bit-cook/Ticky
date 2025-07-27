@@ -371,6 +371,12 @@
   .table {
     display: table;
   }
+  .table-row {
+    display: table-row;
+  }
+  .table-row-group {
+    display: table-row-group;
+  }
   .\!h-6 {
     height: calc(var(--spacing) * 6) !important;
   }
@@ -511,6 +517,9 @@
   }
   .min-w-80 {
     min-width: calc(var(--spacing) * 80);
+  }
+  .flex-shrink {
+    flex-shrink: 1;
   }
   .flex-grow {
     flex-grow: 1;
