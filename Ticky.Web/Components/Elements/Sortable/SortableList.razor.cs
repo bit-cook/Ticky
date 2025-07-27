@@ -42,7 +42,11 @@ namespace Ticky.Web.Components.Elements.Sortable
         )> OnRemove { get; set; }
 
         [Parameter]
-        public EventCallback<(int oldIndex, int newIndex, string columnId)> OnUpdate { get; set; }
+        public EventCallback<(
+            string movedCardId,
+            string? targetCardId,
+            string columnId
+        )> OnUpdate { get; set; }
 
         [Parameter]
         public string? Pull { get; set; }
@@ -82,10 +86,10 @@ namespace Ticky.Web.Components.Elements.Sortable
         }
 
         [JSInvokable]
-        public void OnUpdateJS(int oldIndex, int newIndex, string fromId)
+        public void OnUpdateJS(string movedCardId, string? targetCardId, string fromId)
         {
             // invoke the OnUpdate event passing in the oldIndex and the newIndex
-            OnUpdate.InvokeAsync((oldIndex, newIndex, fromId));
+            OnUpdate.InvokeAsync((movedCardId, targetCardId, fromId));
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

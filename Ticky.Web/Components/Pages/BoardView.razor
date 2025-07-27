@@ -61,7 +61,7 @@
         @if (_board is not null)
         {
             <section id="board-section" class="w-full flex-row gap-5 overflow-x-auto @(_preferences.ShowStats ? "hidden md:flex" : "flex") py-6">
-                <SortableList Class="ml-12 flex flex-row gap-5" Items="_board.Columns.OrderBy(x => x.Index).ToList()" Context="column" OnUpdate="OnColumnMoved" Direction="horizontal" Handle=".drag-toggle" Pull=false Put=false>
+                <SortableList Class="ml-12 flex flex-row gap-5" Items="_board.Columns.OrderBy(x => x.Index).ToList()" Context="column" Direction="horizontal" Handle=".drag-toggle" Pull=false Put=false>
                     <SortableItemTemplate>
                         @{
                             var cardsCount = column.Cards.Where(x => !x.SnoozedUntil.HasValue).Count();
@@ -309,7 +309,24 @@
     private int GetIdFromString(string prefix, string str)
         => Convert.ToInt32(str.Replace(prefix, string.Empty));
 
-    private async Task OnMovedWithinList((int oldIndex, int newIndex, string columnId) args)
+    // private async Task OnColumnMoved((int oldIndex, int newIndex, string _) args)
+    // {
+    //     using var db = _dbContextFactory.CreateDbContext();
+
+    //     var targetBoard = db.Boards
+    //         .Include(x => x.Columns)
+    //         .FirstOrDefault(x => x.Id.Equals(Id));
+
+    //     if(targetBoard is null)
+    //         return;
+
+    //     IndexHelper.ChangeOrderOfItem(targetBoard.Columns, args.oldIndex, args.newIndex);
+
+    //     await db.SaveChangesAsync();
+    //     await HandleUpdate();
+    // }
+
+    private async Task OnMovedWithinList((string movedCardId, string? targetCardId, string columnId) args)
     {
         using var db = _dbContextFactory.CreateDbContext();
 
@@ -317,27 +334,44 @@
             .Include(x => x.Cards)
             .FirstOrDefault(x => x.Id.Equals(GetIdFromString(COLUMN_PREFIX, args.columnId)));
 
-        if(targetColumn is null)
+        if (targetColumn is null)
             return;
 
-        IndexHelper.ChangeOrderOfItem(targetColumn.Cards, args.oldIndex, args.newIndex);
+        var movedCardId = GetIdFromString(Constants.Html.CARD_PREFIX, args.movedCardId);
+        var movedCard = targetColumn.Cards.OrderBy(x => x.Index).FirstOrDefault(x => x.Id.Equals(movedCardId));
 
-        await db.SaveChangesAsync();
-        await HandleUpdate();
-    }
-
-    private async Task OnColumnMoved((int oldIndex, int newIndex, string _) args)
-    {
-        using var db = _dbContextFactory.CreateDbContext();
-
-        var targetBoard = db.Boards
-            .Include(x => x.Columns)
-            .FirstOrDefault(x => x.Id.Equals(Id));
-
-        if(targetBoard is null)
+        if (movedCard is null)
             return;
 
-        IndexHelper.ChangeOrderOfItem(targetBoard.Columns, args.oldIndex, args.newIndex);
+        int targetIndex = targetColumn.Cards.Any() ? targetColumn.Cards.Max(x => x.Index) + 1 : 0;
+
+        if (args.targetCardId is not null)
+        {
+            var targetCardId = GetIdFromString(Constants.Html.CARD_PREFIX, args.targetCardId);
+            var targetCard = targetColumn.Cards.FirstOrDefault(x => x.Id.Equals(targetCardId));
+
+            if (targetCard is not null)
+            {
+                Console.WriteLine($"Moving card {movedCard.Name} in front of card {targetCard.Name}");
+                targetIndex = targetCard.Index;
+
+                foreach (var card in targetColumn.Cards.OrderByDescending(x => x.Index))
+                {
+                    if (card.Index >= targetCard.Index)
+                    {
+                        card.Index++;
+                    }
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Moving card {movedCard.Name} at the end of column");
+        }
+
+        movedCard.Index = targetIndex;
+
+        IndexHelper.FixIndices(targetColumn.Cards);
 
         await db.SaveChangesAsync();
         await HandleUpdate();

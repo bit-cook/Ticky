@@ -23,6 +23,23 @@ export function init(id, group, pull, put, sort, handle, filter, component, forc
         direction: direction,
         onUpdate: (event) => {
             let customChildNodes = Array.from(event.to.childNodes).filter(node => node.tagName === 'DIV');
+
+            //if (customChildNodes.length === 1) {
+            //    if (DEBUG_MODE)
+            //        console.log('ignoring move because moved into the same place')
+            //    return
+            //}
+
+            let movedCardWrapper = event.item
+            let movedCard = Array.from(movedCardWrapper.childNodes).filter(node => node.tagName === 'DIV')[0]
+            let movedCardId = movedCard.id
+
+            let cardBelow = Array.from(customChildNodes[event.newIndex + 1].childNodes).filter(node => node.tagName === 'DIV')[0]
+            let cardBelowId = null
+
+            if (cardBelow)
+                cardBelowId = cardBelow.id
+
             if (DEBUG_MODE) {
                 console.log(event)
                 console.log("onUpdate item:");
@@ -32,36 +49,16 @@ export function init(id, group, pull, put, sort, handle, filter, component, forc
                 console.log('event oldIndex: ', event.oldIndex)
                 console.log('event newIndex: ', event.newIndex)
                 console.log('event to childNodes: ', customChildNodes)
-                console.log('insert before: ', customChildNodes[event.oldIndex])
+                console.log('movedCard: ', movedCard)
+                console.log('insert before: ', cardBelow)
+                console.log('movedCardId: ', movedCardId)
+                console.log('insert before Id: ', cardBelowId)
             }
 
-
-            if (customChildNodes.length === 1) {
-                if (DEBUG_MODE)
-                    console.log('ignoring move because moved into the same place')
-                return
-            }
-
-            event.item.remove();
-
-            if (event.oldIndex < event.newIndex)
-                event.to.insertBefore(event.item, customChildNodes[event.oldIndex])
-            else
-                event.to.insertBefore(event.item, customChildNodes[event.oldIndex+1])
-
-            // method inserts a child node before an existing child. insertBefore(newNode, referenceNode)
-            // referenceNode - The node before which newNode is inserted
-            //event.to.insertBefore(event.item, event.to.childNodes[event.oldIndex]);
-            let oldIndex = event.oldDraggableIndex;
-            let newIndex = event.newDraggableIndex
-
-            // Notify .NET to update its model and re-render
-             component.invokeMethodAsync('OnUpdateJS', oldIndex, newIndex, event.from.id);
+            component.invokeMethodAsync('OnUpdateJS', movedCardId, cardBelowId, event.from.id);
         },
         onRemove: (event) => {
             let customToChildNodes = Array.from(event.to.childNodes).filter(node => node.tagName === 'DIV');
-            let oldIndex = event.oldDraggableIndex;
-            let newIndex = event.newDraggableIndex;
 
             let movedCardWrapper = customToChildNodes[event.newIndex]
             let movedCard = Array.from(movedCardWrapper.childNodes).filter(node => node.tagName === 'DIV')[0]
@@ -80,8 +77,6 @@ export function init(id, group, pull, put, sort, handle, filter, component, forc
                 console.log('event to: ', event.to)
                 console.log('event oldIndex: ', event.oldIndex)
                 console.log('event newIndex: ', event.newIndex)
-                console.log('event oldDraggableIndex: ', oldIndex)
-                console.log('event newDraggableIndex: ', newIndex)
                 console.log('event to childNodes: ', customToChildNodes)
                 console.log('moved card: ', movedCard)
                 console.log('card below inserted: ', cardBelow)
