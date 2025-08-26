@@ -1,5 +1,5 @@
 export function init(id, group, pull, put, sort, handle, filter, component, forceFallback, direction, animation) {
-    const DEBUG_MODE = TRUE;
+    const DEBUG_MODE = true;
 
     if (DEBUG_MODE) {
         console.log("Init for Id:", id);
