@@ -4,7 +4,7 @@
 
 @inject IJSRuntime JS
 
-@typeparam T
+@typeparam T where T : IDbEntry
 
 <div id="@Id" class="@Class" style="@Style">
     @if (Items != null)
@@ -13,7 +13,9 @@
         {
             @if (SortableItemTemplate is not null)
             {
-                @SortableItemTemplate(item)
+                <div @key=item.Id>
+                    @SortableItemTemplate(item)
+                </div>
             }
         }
     }
@@ -22,5 +24,4 @@
         <div>Error: The list of items is null</div>
     }
 </div>
-
 

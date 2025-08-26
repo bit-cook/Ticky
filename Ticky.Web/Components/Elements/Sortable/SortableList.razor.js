@@ -1,5 +1,5 @@
 export function init(id, group, pull, put, sort, handle, filter, component, forceFallback, direction, animation) {
-    const DEBUG_MODE = false;
+    const DEBUG_MODE = TRUE;
 
     if (DEBUG_MODE) {
         console.log("Init for Id:", id);
@@ -30,10 +30,13 @@ export function init(id, group, pull, put, sort, handle, filter, component, forc
                 return
             }
 
-            let movedCard = event.item
-            let movedCardId = movedCard.id
+            // Get the actual card/item element inside the wrapper div
+            let movedCardWrapper = event.item;
+            let movedCard = movedCardWrapper.firstElementChild;
+            let movedCardId = movedCard.id;
 
-            let cardBelow = customChildNodes[event.newIndex + 1]
+            let cardBelowWrapper = customChildNodes[event.newIndex + 1]
+            let cardBelow = cardBelowWrapper?.firstElementChild;
             let cardBelowId = null
 
             if (cardBelow)
@@ -54,23 +57,18 @@ export function init(id, group, pull, put, sort, handle, filter, component, forc
                 console.log('insert before Id: ', cardBelowId)
             }
 
-            event.item.remove()
-
-            if (event.oldIndex < event.newIndex)
-                event.to.insertBefore(event.item, customChildNodes[event.oldIndex])
-            else
-                event.to.insertBefore(event.item, customChildNodes[event.oldIndex + 1])
-                
+            // Do NOT revert DOM changes here. Let Blazor update the state and re-render.
             component.invokeMethodAsync('OnUpdateJS', movedCardId, cardBelowId, event.from.id);
         },
         onRemove: (event) => {
-            let customFromChildNodes = Array.from(event.from.childNodes).filter(node => node.tagName === 'DIV');
             let customToChildNodes = Array.from(event.to.childNodes).filter(node => node.tagName === 'DIV');
 
-            let movedCard = customToChildNodes[event.newIndex]
-            let cardBelow = customToChildNodes[event.newIndex + 1]
-            let cardBelowId = null
-            let movedCardId = movedCard.id
+            let movedCardWrapper = customToChildNodes[event.newIndex];
+            let movedCard = movedCardWrapper?.firstElementChild;
+            let cardBelowWrapper = customToChildNodes[event.newIndex + 1];
+            let cardBelow = cardBelowWrapper?.firstElementChild;
+            let cardBelowId = null;
+            let movedCardId = movedCard?.id;
 
             if (cardBelow)
                 cardBelowId = cardBelow.id
@@ -90,11 +88,7 @@ export function init(id, group, pull, put, sort, handle, filter, component, forc
                 console.log('card below inserted ID: ', cardBelowId)
             }
 
-            // Revert the DOM to match the .NET state
-            event.item.remove();
-
-            event.from.insertBefore(event.item, customFromChildNodes[event.oldIndex]);
-
+            // Do NOT revert DOM changes here. Let Blazor update the state and re-render.
             component.invokeMethodAsync('OnRemoveJS', movedCardId, cardBelowId, event.from.id, event.to.id, event.originalEvent.clientX / event.originalEvent.view.outerWidth, event.originalEvent.clientY / event.originalEvent.view.outerHeight);
         },
         onMove: (event) => {
