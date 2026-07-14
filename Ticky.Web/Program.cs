@@ -53,7 +53,7 @@ builder
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.Name = "ticky-auth";
+    options.Cookie.Name = Constants.Cookies.Authentication;
     options.ExpireTimeSpan = TimeSpan.FromDays(365);
     options.SlidingExpiration = true;
     options.LoginPath = "/auth/login";
@@ -66,7 +66,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.Configure<AntiforgeryOptions>(options =>
 {
-    options.Cookie.Name = "ticky-antiforgery";
+    options.Cookie.Name = Constants.Cookies.Antiforgery;
 });
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>

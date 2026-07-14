@@ -235,7 +235,7 @@
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(uri, options =>
             {
-				var cookieName = ".AspNetCore.Identity.Application";
+                var cookieName = Constants.Cookies.Authentication;
                 var cookieValue = httpContext?.Request?.Cookies[cookieName];
 
                 if (!string.IsNullOrEmpty(cookieValue))
